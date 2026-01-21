@@ -1,93 +1,101 @@
-<!doctype html>
+        const SPREADSHEET_ID = '1ebgK72Arbbu8l-BKPIQ0so19oNkNeab8658ejo7PI7s'; 
+        const API_KEY = 'AIzaSyDNJZGMkK_kVrNr00NMXKszGVUs5iWxeKY';
+        
+        <!doctype html>
 <html lang="ja">
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spreadsheet Data Display</title>
+    <title>Spreadsheet Data & Chart</title>
     <style>
       body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        font-family: sans-serif;
         padding: 20px;
         line-height: 1.6;
+        text-align: center;
       }
-      /* 取得したデータの表示スタイル */
       #ss-data {
         font-size: 20px;
         font-weight: bold;
-        color: #d63384; /* 強調色（ピンク系） */
+        color: #d63384;
         background: #f8f9fa;
         padding: 10px 15px;
         border-radius: 8px;
         display: inline-block;
-        min-height: 1.5em;
         margin-bottom: 20px;
         border: 1px solid #dee2e6;
       }
-      .container {
-        max-width: 800px;
-        margin: 0 auto;
+      .chart-container {
+        margin-top: 20px;
       }
       iframe {
         border: 1px solid #ccc;
         border-radius: 8px;
-        width: 100%;
-        max-width: 600px;
+        max-width: 100%;
+      }
+      /* ダウンロードボタンのスタイル */
+      .download-btn {
+        display: inline-block;
+        margin-top: 15px;
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: bold;
+        transition: background 0.3s;
+        cursor: pointer;
+        border: none;
+      }
+      .download-btn:hover {
+        background-color: #0056b3;
+      }
+      .note {
+        font-size: 12px;
+        color: #666;
+        margin-top: 5px;
       }
     </style>
   </head>
   <body>
 
-    <div class="container">
-      <div id="ss-data">読み込み中...</div>
+    <div id="ss-data">読み込み中...</div>
 
+    <div class="chart-container">
+      <iframe width="600" height="371" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQOPyO9vkqXun7C6VzpZ1CVKBm2Cu-6AoETfRW3Pp7gB4iE0t-_jaXofZH_Yd6qdDzlsGqZFbz85_eX/pubchart?oid=626494851&amp;format=interactive" frameborder="0"></iframe>
+      
       <br>
 
-      <iframe height="371" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQOPyO9vkqXun7C6VzpZ1CVKBm2Cu-6AoETfRW3Pp7gB4iE0t-_jaXofZH_Yd6qdDzlsGqZFbz85_eX/pubchart?oid=626494851&amp;format=interactive" frameborder="0"></iframe>
+      <a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vQOPyO9vkqXun7C6VzpZ1CVKBm2Cu-6AoETfRW3Pp7gB4iE0t-_jaXofZH_Yd6qdDzlsGqZFbz85_eX/pubchart?oid=626494851&format=image" 
+         target="_blank" 
+         class="download-btn">
+        画像を保存・ダウンロード
+      </a>
+      <p class="note">※クリック後、開いた画像を右クリックして「名前を付けて保存」してください。</p>
     </div>
 
     <script>
       (function() {
-        /**
-         * 【設定項目】
-         * 1. SPREADSHEET_ID: ブラウザでシートを開いた時のURLから抽出したもの
-         * 2. API_KEY: Google Cloud Consoleで発行したキー
-         * 3. SHEET_NAME: スプレッドシートの下のタブ名（例: シート1）
-         */
+        // 設定項目
         const SPREADSHEET_ID = '1ebgK72Arbbu8l-BKPIQ0so19oNkNeab8658ejo7PI7s'; 
         const API_KEY = 'AIzaSyDNJZGMkK_kVrNr00NMXKszGVUs5iWxeKY'; 
         const SHEET_NAME = 'シート1'; 
         const RANGE = 'M1414'; 
 
-        const displayElement = document.getElementById("ss-data");
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}!${RANGE}?key=${API_KEY}`;
 
-        async function loadSheetData() {
+        async function loadData() {
           try {
             const response = await fetch(url);
             const data = await response.json();
-
-            if (!response.ok) {
-              // APIキーが無効、またはIDが間違っている場合のエラー詳細を表示
-              throw new Error(`${data.error.status}: ${data.error.message}`);
-            }
-
-            // data.values[0][0] にセルの値が入っています
             if (data.values && data.values[0]) {
-              // 届いたデータをそのまま（加工せず）表示
-              displayElement.innerText = data.values[0][0];
-            } else {
-              displayElement.innerText = "セルが空です";
+              document.getElementById("ss-data").innerText = data.values[0][0];
             }
-
-          } catch (error) {
-            console.error("Fetch Error:", error);
-            // 画面にエラー内容を表示（デバッグ用）
-            displayElement.style.color = "red";
-            displayElement.innerText = "エラー: " + error.message;
+          } catch (e) {
+            document.getElementById("ss-data").innerText = "Error";
           }
         }
-
-        loadSheetData();
+        loadData();
       })();
     </script>
   </body>
