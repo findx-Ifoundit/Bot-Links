@@ -3,72 +3,56 @@
 <html lang="ja">
   <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>データ表示 (UTC対応版)</title>
-    
+    <title>スプレッドシート データ連携ページ</title>
     <style>
-      body {
+      #ss-data {
         font-family: sans-serif;
-        padding: 20px;
-        line-height: 1.6;
-      }
-      .container {
-        border: 1px solid #eee;
-        padding: 15px;
-        border-radius: 8px;
-        background-color: #f9f9f9;
+        font-size: 20px;
+        font-weight: bold;
+        color: #333;
+        padding: 10px;
+        background: #f0f0f0;
         display: inline-block;
       }
-      .time-label { font-size: 0.9em; color: #666; }
-      #utc-time { font-weight: bold; color: #d9534f; margin-bottom: 10px; }
-      #ss-data { font-size: 20px; font-weight: bold; color: #0275d8; }
     </style>
   </head>
   <body>
 
-    <div class="container">
-      <div class="time-label">世界標準時刻 (UTC):</div>
-      <div id="utc-time">読み込み中...</div>
-      
-      <div class="time-label">スプレッドシートデータ (M1414):</div>
-      <div id="ss-data">読み込み中...</div>
-    </div>
+    <div id="ss-data">読み込み中...</div>
 
-    <br><br>
+    <br>
 
-    <iframe width="600" height="371" border="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQOPyO9vkqXun7C6VzpZ1CVKBm2Cu-6AoETfRW3Pp7gB4iE0t-_jaXofZH_Yd6qdDzlsGqZFbz85_eX/pubchart?oid=626494851&amp;format=interactive"></iframe>
+    <iframe width="600" height="371" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQOPyO9vkqXun7C6VzpZ1CVKBm2Cu-6AoETfRW3Pp7gB4iE0t-_jaXofZH_Yd6qdDzlsGqZFbz85_eX/pubchart?oid=626494851&amp;format=interactive"></iframe>
 
     <script>
       (function() {
-        // 1. 世界標準時刻 (UTC) を表示する関数
-        function updateUTCTime() {
-          const now = new Date();
-          // toISOString() や toUTCString() を使って世界標準時に変換します
-          const utcString = now.toUTCString().replace("GMT", "UTC");
-          document.getElementById("utc-time").innerText = utcString;
-        }
-
-        // 2. スプレッドシートのデータを取得する関数
         const url = "https://script.google.com/macros/s/AKfycbwwbfi0aUrDi__XbNgj8OltBUrAZWNfvHe0KUllqRM5yEE5S2dCexpVvA8VWSAAokr3/exec";
-        
-        async function fetchSheetData() {
-          try {
-            const response = await fetch(url);
-            const data = await response.text();
-            document.getElementById("ss-data").innerText = data;
-          } catch (error) {
-            document.getElementById("ss-data").innerText = "取得エラー";
-          }
-        }
 
-        // 初回実行
-        updateUTCTime();
-        fetchSheetData();
-        
-        // 時刻を1秒ごとに更新したい場合は以下を有効にします
-        setInterval(updateUTCTime, 1000);
+        fetch(url)
+          .then(response => response.text())
+          .then(rawData => {
+            const displayElement = document.getElementById("ss-data");
+            
+            // 取得した文字列を日付オブジェクトに変換
+            const dateObj = new Date(rawData);
+
+            // 日付として正しく変換できた場合のみ、読みやすい形式に整形
+            if (!isNaN(dateObj.getTime())) {
+              const formattedDate = dateObj.getFullYear() + "年" + 
+                                    (dateObj.getMonth() + 1) + "月" + 
+                                    dateObj.getDate() + "日 " + 
+                                    dateObj.getHours() + ":" + 
+                                    dateObj.getMinutes().toString().padStart(2, '0');
+              displayElement.innerText = formattedDate;
+            } else {
+              // 日付ではない普通のテキストだった場合はそのまま表示
+              displayElement.innerText = rawData;
+            }
+          })
+          .catch(error => {
+            document.getElementById("ss-data").innerText = "取得エラー";
+          });
       })();
     </script>
-
   </body>
 </html>
