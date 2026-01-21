@@ -2,63 +2,93 @@
 <html lang="ja">
   <head>
     <meta charset="UTF-8">
-    <title>Sheets API Data Display</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spreadsheet Data Display</title>
     <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        padding: 20px;
+        line-height: 1.6;
+      }
+      /* 取得したデータの表示スタイル */
       #ss-data {
-        font-family: sans-serif;
-        font-size: 18px;
+        font-size: 20px;
         font-weight: bold;
-        color: #333;
+        color: #d63384; /* 強調色（ピンク系） */
+        background: #f8f9fa;
+        padding: 10px 15px;
+        border-radius: 8px;
         display: inline-block;
-        margin-bottom: 10px;
-        min-height: 1.2em;
+        min-height: 1.5em;
+        margin-bottom: 20px;
+        border: 1px solid #dee2e6;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      iframe {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        width: 100%;
+        max-width: 600px;
       }
     </style>
   </head>
   <body>
 
-    <div id="ss-data">読み込み中...</div>
+    <div class="container">
+      <div id="ss-data">読み込み中...</div>
 
-    <br>
+      <br>
 
-    <iframe width="600" height="371" frameborder="0" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQOPyO9vkqXun7C6VzpZ1CVKBm2Cu-6AoETfRW3Pp7gB4iE0t-_jaXofZH_Yd6qdDzlsGqZFbz85_eX/pubchart?oid=626494851&amp;format=interactive"></iframe>
+      <iframe height="371" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQOPyO9vkqXun7C6VzpZ1CVKBm2Cu-6AoETfRW3Pp7gB4iE0t-_jaXofZH_Yd6qdDzlsGqZFbz85_eX/pubchart?oid=626494851&amp;format=interactive" frameborder="0"></iframe>
+    </div>
 
     <script>
       (function() {
-        // --- 設定項目 ---
-        const SPREADSHEET_ID = '2PACX-1vQOPyO9vkqXun7C6VzpZ1CVKBm2Cu-6AoETfRW3Pp7gB4iE0t-_jaXofZH_Yd6qdDzlsGqZFbz85_eX'; // 公開URLから取得したID
-        const API_KEY = '1ebgK72Arbbu8l-BKPIQ0so19oNkNeab8658ejo7PI7s'; // ここに取得したAPIキーを入力
-        const SHEET_NAME = '無題のスプレッドシート - シート1'; // 実際のシート名に変更してください
+        /**
+         * 【設定項目】
+         * 1. SPREADSHEET_ID: ブラウザでシートを開いた時のURLから抽出したもの
+         * 2. API_KEY: Google Cloud Consoleで発行したキー
+         * 3. SHEET_NAME: スプレッドシートの下のタブ名（例: シート1）
+         */
+        const SPREADSHEET_ID = '1vQOPyO9vkqXun7C6VzpZ1CVKBm2Cu-6AoETfRW3Pp7gB4iE0t-_jaXofZH_Yd6qdDzlsGqZFbz85_eX'; 
+        const API_KEY = 'あなたのAPIキーをここに貼り付け'; 
+        const SHEET_NAME = 'シート1'; 
         const RANGE = 'M1414'; 
-        // ----------------
 
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}!${RANGE}?key=${API_KEY}`;
         const displayElement = document.getElementById("ss-data");
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}!${RANGE}?key=${API_KEY}`;
 
-        async function fetchValue() {
+        async function loadSheetData() {
           try {
             const response = await fetch(url);
-            if (!response.ok) {
-              const errorData = await response.json();
-              throw new Error(errorData.error.message || 'API Error');
-            }
-            
             const data = await response.json();
-            
-            // values[行][列] の形式で届く。1セルの場合は [0][0]
-            const text = (data.values && data.values[0]) ? data.values[0][0] : "データなし";
-            
-            displayElement.innerText = text;
+
+            if (!response.ok) {
+              // APIキーが無効、またはIDが間違っている場合のエラー詳細を表示
+              throw new Error(`${data.error.status}: ${data.error.message}`);
+            }
+
+            // data.values[0][0] にセルの値が入っています
+            if (data.values && data.values[0]) {
+              // 届いたデータをそのまま（加工せず）表示
+              displayElement.innerText = data.values[0][0];
+            } else {
+              displayElement.innerText = "セルが空です";
+            }
 
           } catch (error) {
-            console.error("API Fetch Error:", error);
-            displayElement.innerText = "Error: " + error.message;
+            console.error("Fetch Error:", error);
+            // 画面にエラー内容を表示（デバッグ用）
+            displayElement.style.color = "red";
+            displayElement.innerText = "エラー: " + error.message;
           }
         }
 
-        fetchValue();
+        loadSheetData();
       })();
     </script>
-
   </body>
 </html>
