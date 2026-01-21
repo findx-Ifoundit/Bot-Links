@@ -2,15 +2,15 @@
 <html lang="ja">
   <head>
     <meta charset="UTF-8">
-    <title>スプレッドシート データ連携ページ</title>
+    <title>Sheet Data Display</title>
     <style>
       #ss-data {
-        font-family: 'Courier New', Courier, monospace; /* UTCっぽく等幅フォントに */
+        font-family: sans-serif;
         font-size: 18px;
         font-weight: bold;
-        color: #d63384; /* 目立つ色に */
-        padding: 10px;
+        color: #333;
         display: inline-block;
+        margin-bottom: 10px;
       }
     </style>
   </head>
@@ -28,20 +28,16 @@
         const displayElement = document.getElementById("ss-data");
 
         fetch(url)
-          .then(response => response.text())
-          .then(rawData => {
-            const dateObj = new Date(rawData);
-
-            // 日付として認識できれば世界標準時(UTC)に変換、できなければそのまま表示
-            if (!isNaN(dateObj.getTime())) {
-              displayElement.innerText = dateObj.toUTCString();
-            } else {
-              displayElement.innerText = rawData;
-            }
+          .then(response => {
+            if (!response.ok) throw new Error();
+            return response.text();
           })
-          .catch(error => {
-            console.error("Error:", error);
-            displayElement.innerText = "Error loading data.";
+          .then(data => {
+            // 届いたデータを加工せず、そのまま表示
+            displayElement.innerText = data;
+          })
+          .catch(() => {
+            displayElement.innerText = "Error: データを取得できませんでした";
           });
       })();
     </script>
