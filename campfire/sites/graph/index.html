@@ -1,10 +1,44 @@
 <!doctype html>
+<!--code made by gemini-->
 <html lang="ja">
   <head>
-    
+    <meta charset="UTF-8">
+    <title>スプレッドシートデータ表示</title>
+    <style>
+      /* テキストの見た目を調整したい場合はここを編集してください */
+      #ss-data {
+        font-family: sans-serif;
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+        display: inline-block;
+        margin-bottom: 10px;
+      }
+    </style>
   </head>
   <body>
-    <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQOPyO9vkqXun7C6VzpZ1CVKBm2Cu-6AoETfRW3Pp7gB4iE0t-_jaXofZH_Yd6qdDzlsGqZFbz85_eX/pubhtml?gid=95825196&amp;single=true&amp;widget=true&amp;headers=false&amp;range=M1414"></iframe>
+
+    <div id="ss-data">読み込み中...</div>
+
+    <br>
+
     <iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQOPyO9vkqXun7C6VzpZ1CVKBm2Cu-6AoETfRW3Pp7gB4iE0t-_jaXofZH_Yd6qdDzlsGqZFbz85_eX/pubchart?oid=626494851&amp;format=interactive"></iframe>
+
+    <script>
+      // 先ほど発行したウェブアプリのURL
+      const url = "https://script.google.com/macros/s/AKfycbwwbfi0aUrDi__XbNgj8OltBUrAZWNfvHe0KUllqRM5yEE5S2dCexpVvA8VWSAAokr3/exec";
+
+      fetch(url)
+        .then(response => response.text())
+        .then(data => {
+          // 取得した値を表示場所に上書き
+          document.getElementById("ss-data").innerText = data;
+        })
+        .catch(error => {
+          console.error("エラー:", error);
+          document.getElementById("ss-data").innerText = "データの取得に失敗しました";
+        });
+    </script>
+
   </body>
 </html>
