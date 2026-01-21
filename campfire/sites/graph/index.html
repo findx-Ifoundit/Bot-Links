@@ -4,13 +4,15 @@
     <meta charset="UTF-8">
     <title>Sheet Data Display</title>
     <style>
+      /* テキストの見た目：必要に応じて調整してください */
       #ss-data {
         font-family: sans-serif;
         font-size: 18px;
         font-weight: bold;
         color: #333;
         display: inline-block;
-        margin-bottom: 10px;
+        padding: 5px;
+        min-height: 1.2em;
       }
     </style>
   </head>
@@ -24,22 +26,35 @@
 
     <script>
       (function() {
+        // 【注意】必ず「新バージョン」をデプロイした際の最新URLを貼り付けてください
         const url = "https://script.google.com/macros/s/AKfycbwwbfi0aUrDi__XbNgj8OltBUrAZWNfvHe0KUllqRM5yEE5S2dCexpVvA8VWSAAokr3/exec";
         const displayElement = document.getElementById("ss-data");
 
-        fetch(url)
-          .then(response => {
-            if (!response.ok) throw new Error();
-            return response.text();
-          })
-          .then(data => {
-            // 届いたデータを加工せず、そのまま表示
-            displayElement.innerText = data;
-          })
-          .catch(() => {
-            displayElement.innerText = "Error: データを取得できませんでした";
-          });
+        async function loadData() {
+          try {
+            // リダイレクト(googleusercontents.com)を自動で追いかける設定
+            const response = await fetch(url, {
+              method: "GET",
+              mode: "cors", // 外部サイトからのアクセスを明示
+              redirect: "follow"
+            });
+
+            if (!response.ok) throw new Error('Network response was not ok');
+            
+            const text = await response.text();
+            
+            // 届いたデータを加工せず、そのまま1回パッと表示
+            displayElement.innerText = text;
+
+          } catch (error) {
+            console.error("Fetch Error:", error);
+            displayElement.innerText = "Error: データを読み込めませんでした";
+          }
+        }
+
+        loadData();
       })();
     </script>
+
   </body>
 </html>
