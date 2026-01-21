@@ -2,98 +2,67 @@
 <html lang="ja">
   <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spreadsheet Data & Chart</title>
+    <title>Sheet Data & Chart Download</title>
     <style>
-      body {
-        font-family: sans-serif;
-        padding: 20px;
-        line-height: 1.6;
-        text-align: center;
-      }
-      #ss-data {
-        font-size: 20px;
-        font-weight: bold;
-        color: #d63384;
-        background: #f8f9fa;
-        padding: 10px 15px;
-        border-radius: 8px;
-        display: inline-block;
-        margin-bottom: 20px;
-        border: 1px solid #dee2e6;
-      }
-      .chart-container {
-        margin-top: 20px;
-      }
-      iframe {
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        max-width: 100%;
-      }
-      /* ダウンロードボタンのスタイル */
-      .download-btn {
-        display: inline-block;
-        margin-top: 15px;
-        padding: 10px 20px;
-        background-color: #007bff;
+      body { font-family: sans-serif; text-align: center; padding: 20px; }
+      #ss-data { font-size: 24px; font-weight: bold; margin-bottom: 20px; display: block; }
+      .btn-download {
+        padding: 12px 24px;
+        font-size: 16px;
+        background-color: #28a745;
         color: white;
-        text-decoration: none;
-        border-radius: 5px;
-        font-weight: bold;
-        transition: background 0.3s;
-        cursor: pointer;
         border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        text-decoration: none;
       }
-      .download-btn:hover {
-        background-color: #0056b3;
-      }
-      .note {
-        font-size: 12px;
-        color: #666;
-        margin-top: 5px;
-      }
+      .btn-download:hover { background-color: #218838; }
+      iframe { margin-top: 20px; border: 1px solid #ccc; }
     </style>
   </head>
   <body>
 
     <div id="ss-data">読み込み中...</div>
 
-    <div class="chart-container">
-      <iframe width="600" height="371" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQOPyO9vkqXun7C6VzpZ1CVKBm2Cu-6AoETfRW3Pp7gB4iE0t-_jaXofZH_Yd6qdDzlsGqZFbz85_eX/pubchart?oid=626494851&amp;format=interactive" frameborder="0"></iframe>
-      
-      <br>
+    <iframe width="600" height="371" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQOPyO9vkqXun7C6VzpZ1CVKBm2Cu-6AoETfRW3Pp7gB4iE0t-_jaXofZH_Yd6qdDzlsGqZFbz85_eX/pubchart?oid=626494851&amp;format=interactive" frameborder="0"></iframe>
 
-      <a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vQOPyO9vkqXun7C6VzpZ1CVKBm2Cu-6AoETfRW3Pp7gB4iE0t-_jaXofZH_Yd6qdDzlsGqZFbz85_eX/pubchart?oid=626494851&format=image" 
-         target="_blank" 
-         class="download-btn">
-        画像を保存・ダウンロード
-      </a>
-      <p class="note">※クリック後、開いた画像を右クリックして「名前を付けて保存」してください。</p>
-    </div>
+    <br><br>
+
+    <button type="button" class="btn-download" onclick="downloadChart()">グラフをダウンロード</button>
 
     <script>
-      (function() {
-        // 設定項目
+      // 1. スプレッドシートからのデータ取得 (Google Sheets API)
+      (async function() {
         const SPREADSHEET_ID = '1ebgK72Arbbu8l-BKPIQ0so19oNkNeab8658ejo7PI7s'; 
         const API_KEY = 'AIzaSyDNJZGMkK_kVrNr00NMXKszGVUs5iWxeKY'; 
-        const SHEET_NAME = 'シート1'; 
-        const RANGE = 'M1414'; 
-
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}!${RANGE}?key=${API_KEY}`;
-
-        async function loadData() {
-          try {
-            const response = await fetch(url);
-            const data = await response.json();
-            if (data.values && data.values[0]) {
-              document.getElementById("ss-data").innerText = data.values[0][0];
-            }
-          } catch (e) {
-            document.getElementById("ss-data").innerText = "Error";
-          }
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/シート1!M1414?key=${API_KEY}`;
+        try {
+          const res = await fetch(url);
+          const data = await res.json();
+          document.getElementById("ss-data").innerText = data.values[0][0];
+        } catch (e) {
+          document.getElementById("ss-data").innerText = "Error";
         }
-        loadData();
       })();
+
+      // 2. ダウンロード処理
+      function downloadChart() {
+        const imgUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQOPyO9vkqXun7C6VzpZ1CVKBm2Cu-6AoETfRW3Pp7gB4iE0t-_jaXofZH_Yd6qdDzlsGqZFbz85_eX/pubchart?oid=626494851&format=image";
+        
+        // 一時的なリンクを作成
+        const link = document.createElement('a');
+        link.href = imgUrl;
+        link.download = 'chart.png'; // ダウンロード時のファイル名
+        
+        // リンクをドキュメントに追加（一部のブラウザで必要）
+        document.body.appendChild(link);
+        
+        // 強制クリック
+        link.click();
+        
+        // 後片付け
+        document.body.removeChild(link);
+      }
     </script>
   </body>
 </html>
