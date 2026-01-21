@@ -2,23 +2,22 @@
 <html lang="ja">
   <head>
     <meta charset="UTF-8">
-    <title>Sheet Data Display</title>
+    <title>Sheets API Data Display</title>
     <style>
-      /* テキストの見た目：必要に応じて調整してください */
       #ss-data {
         font-family: sans-serif;
         font-size: 18px;
         font-weight: bold;
         color: #333;
         display: inline-block;
-        padding: 5px;
+        margin-bottom: 10px;
         min-height: 1.2em;
       }
     </style>
   </head>
   <body>
 
-    <div id="ss-data"></div>
+    <div id="ss-data">読み込み中...</div>
 
     <br>
 
@@ -26,33 +25,38 @@
 
     <script>
       (function() {
-        // 【注意】必ず「新バージョン」をデプロイした際の最新URLを貼り付けてください
-        const url = "https://script.google.com/macros/s/AKfycbwwbfi0aUrDi__XbNgj8OltBUrAZWNfvHe0KUllqRM5yEE5S2dCexpVvA8VWSAAokr3/exec";
+        // --- 設定項目 ---
+        const SPREADSHEET_ID = '2PACX-1vQOPyO9vkqXun7C6VzpZ1CVKBm2Cu-6AoETfRW3Pp7gB4iE0t-_jaXofZH_Yd6qdDzlsGqZFbz85_eX'; // 公開URLから取得したID
+        const API_KEY = 'AIzaSyDNJZGMkK_kVrNr00NMXKszGVUs5iWxeKY'; // ここに取得したAPIキーを入力
+        const SHEET_NAME = '無題のスプレッドシート - シート1'; // 実際のシート名に変更してください
+        const RANGE = 'M1414'; 
+        // ----------------
+
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}!${RANGE}?key=${API_KEY}`;
         const displayElement = document.getElementById("ss-data");
 
-        async function loadData() {
+        async function fetchValue() {
           try {
-            // リダイレクト(googleusercontents.com)を自動で追いかける設定
-            const response = await fetch(url, {
-              method: "GET",
-              mode: "cors", // 外部サイトからのアクセスを明示
-              redirect: "follow"
-            });
-
-            if (!response.ok) throw new Error('Network response was not ok');
+            const response = await fetch(url);
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.error.message || 'API Error');
+            }
             
-            const text = await response.text();
+            const data = await response.json();
             
-            // 届いたデータを加工せず、そのまま1回パッと表示
+            // values[行][列] の形式で届く。1セルの場合は [0][0]
+            const text = (data.values && data.values[0]) ? data.values[0][0] : "データなし";
+            
             displayElement.innerText = text;
 
           } catch (error) {
-            console.error("Fetch Error:", error);
-            displayElement.innerText = "Error: データを読み込めませんでした";
+            console.error("API Fetch Error:", error);
+            displayElement.innerText = "Error: " + error.message;
           }
         }
 
-        loadData();
+        fetchValue();
       })();
     </script>
 
