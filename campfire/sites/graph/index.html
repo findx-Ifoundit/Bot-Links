@@ -1,56 +1,47 @@
 <!doctype html>
-<!--code made by gemini-->
 <html lang="ja">
   <head>
     <meta charset="UTF-8">
     <title>スプレッドシート データ連携ページ</title>
     <style>
       #ss-data {
-        font-family: sans-serif;
-        font-size: 20px;
+        font-family: 'Courier New', Courier, monospace; /* UTCっぽく等幅フォントに */
+        font-size: 18px;
         font-weight: bold;
-        color: #333;
+        color: #d63384; /* 目立つ色に */
         padding: 10px;
-        background: #f0f0f0;
         display: inline-block;
       }
     </style>
   </head>
   <body>
 
-    <div id="ss-data">読み込み中...</div>
+    <div id="ss-data"></div>
 
     <br>
 
-    <iframe width="600" height="371" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQOPyO9vkqXun7C6VzpZ1CVKBm2Cu-6AoETfRW3Pp7gB4iE0t-_jaXofZH_Yd6qdDzlsGqZFbz85_eX/pubchart?oid=626494851&amp;format=interactive"></iframe>
+    <iframe width="600" height="371" frameborder="0" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQOPyO9vkqXun7C6VzpZ1CVKBm2Cu-6AoETfRW3Pp7gB4iE0t-_jaXofZH_Yd6qdDzlsGqZFbz85_eX/pubchart?oid=626494851&amp;format=interactive"></iframe>
 
     <script>
       (function() {
         const url = "https://script.google.com/macros/s/AKfycbwwbfi0aUrDi__XbNgj8OltBUrAZWNfvHe0KUllqRM5yEE5S2dCexpVvA8VWSAAokr3/exec";
+        const displayElement = document.getElementById("ss-data");
 
         fetch(url)
           .then(response => response.text())
           .then(rawData => {
-            const displayElement = document.getElementById("ss-data");
-            
-            // 取得した文字列を日付オブジェクトに変換
             const dateObj = new Date(rawData);
 
-            // 日付として正しく変換できた場合のみ、読みやすい形式に整形
+            // 日付として認識できれば世界標準時(UTC)に変換、できなければそのまま表示
             if (!isNaN(dateObj.getTime())) {
-              const formattedDate = dateObj.getFullYear() + "年" + 
-                                    (dateObj.getMonth() + 1) + "月" + 
-                                    dateObj.getDate() + "日 " + 
-                                    dateObj.getHours() + ":" + 
-                                    dateObj.getMinutes().toString().padStart(2, '0');
-              displayElement.innerText = formattedDate;
+              displayElement.innerText = dateObj.toUTCString();
             } else {
-              // 日付ではない普通のテキストだった場合はそのまま表示
               displayElement.innerText = rawData;
             }
           })
           .catch(error => {
-            document.getElementById("ss-data").innerText = "取得エラー";
+            console.error("Error:", error);
+            displayElement.innerText = "Error loading data.";
           });
       })();
     </script>
